@@ -12,45 +12,42 @@
 <script src="js/lib/loaders/OBJLoader.js"></script>
 <script src="js/lib/loaders/OBJMTLLoader.js"></script>
 <script>
+
+
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.y += 400;
-    camera.position.z += 200;
-
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-
-
-    camera.position.z = 5;
     var ambientLight = new THREE.AmbientLight(0x000044);
     scene.add(ambientLight);
-
-    // directional lighting
     var directionalLight = new THREE.DirectionalLight(0xffffff);
     directionalLight.position.set(1, 1, 1).normalize();
     scene.add(directionalLight);
+
+    //Load Ship
     var loader = new THREE.OBJMTLLoader();
     var ship;
     loader.load("assets/ships/wraith/Wraith Raider Starship.obj", "assets/ships/wraith/Wraith_Raider_Starship.mtl", function (object) {
         ship = object;
-        scene.add(object);
-        camera.lookAt(ship.position);
+        scene.add(object); camera.position.y += 200;
         ship.add(camera);
+        camera.position.z -= 600;
+        camera.lookAt(ship.position);
 
     });
+
+    //Load Skybox
     var imagePrefix = "assets/sky/sky1/";
     var directions  = ["posx", "negx", "posy", "negy", "posz", "negz"];
     var imageSuffix = ".png";
-
     var materialArray = [];
-    directions.forEach(function(name){
-        materialArray.push(imagePrefix+name+imageSuffix);
-    });
+        directions.forEach(function(name){
+            materialArray.push(imagePrefix+name+imageSuffix);
+        });
     var cubemap = THREE.ImageUtils.loadTextureCube(materialArray); // load textures
     cubemap.format = THREE.RGBFormat;
-
     var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
     shader.uniforms['tCube'].value = cubemap; // apply textures to shader
 
@@ -60,26 +57,27 @@
       vertexShader: shader.vertexShader,
       uniforms: shader.uniforms,
       depthWrite: false,
-      side: THREE.BackSide
+      side: THREE.DoubleSide
     });
 
     // create skybox mesh
     var skybox = new THREE.Mesh(
-      new THREE.CubeGeometry(1000, 1000, 1000),
+      new THREE.CubeGeometry(2000, 2000, 2000),
       skyBoxMaterial
     );
-
     scene.add(skybox);
 
+
+    //Render Loop
     var clock = new THREE.Clock();
     var render = function (now) {
         requestAnimationFrame(render);
         var delta = clock.getDelta();
-        ship.rotation.y += 10 * delta * Math.PI / 180;
-        ship.rotation.x += 10 * delta * Math.PI / 180;
-//				cube.rotation.x += 10;
-//				cube.rotation.y += 10;
-//              cube.rotation.z += 10;
+        if(ship!=undefined){
+            ship.rotation.y += 10 * delta * Math.PI / 180;
+            ship.rotation.x += 10 * delta * Math.PI / 180;
+            skybox.position=camera.position;
+        }
         last = now;
         renderer.render(scene, camera);
     };
