@@ -31,10 +31,10 @@
     scene.add(directionalLight);
 
     //Load Ship
-    var loader = new THREE.JSONLoader();
+    var loader = new THREE.OBJMTLLoader();
     var ship;
-    loader.load("assets/ships/test/ship.js",function (geometry,materials) {
-        ship =  new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    loader.load("assets/ships/test/Sample_Ship.obj",function (object) {
+        ship =  object;
         scene.add(ship);
         camera.position.y += 200;
         ship.add(camera);
